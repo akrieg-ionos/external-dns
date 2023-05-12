@@ -24,6 +24,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 
 	"sigs.k8s.io/external-dns/endpoint"
 	"sigs.k8s.io/external-dns/plan"
@@ -99,11 +100,11 @@ func init() {
 }
 
 func NewPluginProvider(u string) (*PluginProvider, error) {
+	time.Sleep(1 * time.Second)
 	parsedURL, err := url.Parse(u)
 	if err != nil {
 		return nil, err
 	}
-
 	// negotiate API information
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
