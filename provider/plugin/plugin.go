@@ -149,12 +149,7 @@ func NewPluginProvider(u string) (*PluginProvider, error) {
 
 // Records will make a GET call to remoteServerURL/records and return the results
 func (p PluginProvider) Records(ctx context.Context) ([]*endpoint.Endpoint, error) {
-	u, err := url.JoinPath(p.remoteServerURL.String(), "records")
-	if err != nil {
-		recordsErrorsGauge.Inc()
-		log.Debugf("Failed to join path: %s", err.Error())
-		return nil, err
-	}
+	u := p.remoteServerURL.JoinPath("records").String()
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		recordsErrorsGauge.Inc()
@@ -195,12 +190,7 @@ func (p PluginProvider) Records(ctx context.Context) ([]*endpoint.Endpoint, erro
 
 // ApplyChanges will make a POST to remoteServerURL/records with the changes
 func (p PluginProvider) ApplyChanges(ctx context.Context, changes *plan.Changes) error {
-	u, err := url.JoinPath(p.remoteServerURL.String(), "records")
-	if err != nil {
-		applyChangesErrorsGauge.Inc()
-		log.Debugf("Failed to join path: %s", err.Error())
-		return err
-	}
+	u := p.remoteServerURL.JoinPath("records").String()
 	b, err := json.Marshal(changes)
 	if err != nil {
 		applyChangesErrorsGauge.Inc()
@@ -235,12 +225,7 @@ func (p PluginProvider) ApplyChanges(ctx context.Context, changes *plan.Changes)
 // Errors in anything technically happening from the provider will return true so that no update is performed.
 // Errors will also be logged and exposed as metrics so that it is possible to alert on them if needed.
 func (p PluginProvider) PropertyValuesEqual(name string, previous string, current string) bool {
-	u, err := url.JoinPath(p.remoteServerURL.String(), "propertyvaluesequal")
-	if err != nil {
-		propertyValuesEqualErrorsGauge.Inc()
-		log.Debugf("Failed to join path: %s", err)
-		return true
-	}
+	u := p.remoteServerURL.JoinPath("propertyvaluesequal").String()
 	b, err := json.Marshal(&PropertyValuesEqualRequest{
 		Name:     name,
 		Previous: previous,
@@ -294,12 +279,7 @@ func (p PluginProvider) PropertyValuesEqual(name string, previous string, curren
 // This method returns an empty slice in case there is a technical error on the provider's side so that no endpoints will be considered.
 func (p PluginProvider) AdjustEndpoints(e []*endpoint.Endpoint) []*endpoint.Endpoint {
 	endpoints := []*endpoint.Endpoint{}
-	u, err := url.JoinPath(p.remoteServerURL.String(), "adjustendpoints")
-	if err != nil {
-		adjustEndpointsErrorsGauge.Inc()
-		log.Debugf("Failed to join path, %s", err)
-		return endpoints
-	}
+	u := p.remoteServerURL.JoinPath("adjustendpoints").String()
 	b, err := json.Marshal(e)
 	if err != nil {
 		adjustEndpointsErrorsGauge.Inc()
