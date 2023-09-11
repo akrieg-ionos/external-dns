@@ -24,6 +24,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 
 	"sigs.k8s.io/external-dns/endpoint"
 	"sigs.k8s.io/external-dns/plan"
@@ -94,6 +95,10 @@ func NewWebhookProvider(u string) (*WebhookProvider, error) {
 
 	client := &http.Client{}
 	var resp *http.Response
+
+	bo := backoff.NewExponentialBackOff()
+	bo.InitialInterval = 2 * time.Second
+	bo.MaxInterval = 10 * time.Second
 	err = backoff.Retry(func() error {
 		resp, err = client.Do(req)
 		if err != nil {
@@ -105,7 +110,7 @@ func NewWebhookProvider(u string) (*WebhookProvider, error) {
 			return backoff.Permanent(fmt.Errorf("status code < 500"))
 		}
 		return nil
-	}, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), maxRetries))
+	}, backoff.WithMaxRetries(bo, maxRetries))
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to plugin api: %v", err)
