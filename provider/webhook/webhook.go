@@ -97,8 +97,7 @@ func NewWebhookProvider(u string) (*WebhookProvider, error) {
 	var resp *http.Response
 
 	bo := backoff.NewExponentialBackOff()
-	bo.InitialInterval = 2 * time.Second
-	bo.MaxInterval = 10 * time.Second
+	bo.InitialInterval = 8 * time.Second
 	err = backoff.Retry(func() error {
 		resp, err = client.Do(req)
 		if err != nil {
